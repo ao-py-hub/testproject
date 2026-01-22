@@ -52,6 +52,6 @@ PrizeFormSet = inlineformset_factory(
     model=Prize,
     form=PrizeForm,
     formset=BasePrizeFormSet,
-    extra=0,
+    extra=20,
     can_delete=True,
 )
