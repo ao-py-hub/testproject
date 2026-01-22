@@ -15,7 +15,9 @@ SECRET_KEY = os.environ.get(
     "SECRET_KEY",
     "django-insecure-LOCAL-ONLY-CHANGE-ME"
 )
-
+CSRF_TRUSTED_ORIGINS = [
+    "https://testproject-w96l.onrender.com",
+]
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [
