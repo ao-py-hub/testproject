@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Sign up{% endblock %}
+{% block page_heading %}ユーザー登録{% endblock %}
+{% block page_subheading %}IDとパスワードでアカウントを作成します{% endblock %}
+
+{% block content %}
+<style>
+  .wrap { max-width: 560px; margin: 0 auto; }
+  .cardw{
+    background:#fff;
+    color:#0f172a;
+    border:1px solid rgba(15,23,42,.12);
+    border-radius:16px;
+    box-shadow:0 8px 24px rgba(0,0,0,.08);
+    overflow:hidden;
+  }
+  .hd{ padding:14px 16px; border-bottom:1px solid rgba(15,23,42,.10); font-weight:1000; }
+  .bd{ padding:16px; }
+
+  .field{ margin-bottom: 14px; }
+  label{ display:block; font-weight:900; margin-bottom:6px; }
+  .help{ font-size:.85rem; color: rgba(15,23,42,.65); margin-top:6px; }
+  .err{ font-size:.9rem; color:#b91c1c; margin-top:6px; }
+
+  input[type=text], input[type=password], input[type=email]{
+    width:100%;
+    border:1px solid rgba(15,23,42,.20);
+    border-radius:12px;
+    padding:.6rem .75rem;
+    background:#fff;
+    color:#0f172a;
+    caret-color:#2563eb;
+    -webkit-text-fill-color:#0f172a;
+  }
+  input:focus{
+    outline:none;
+    border-color:#2563eb;
+    box-shadow:0 0 0 .2rem rgba(37,99,235,.18);
+  }
+
+  .btnrow{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+</style>
+
+<div class="wrap">
+  <section class="cardw">
+    <div class="hd">ユーザー登録</div>
+    <div class="bd">
+
+      {% if form.non_field_errors %}
+        <div class="err">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% for field in form %}
+          <div class="field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+              <div class="help">{{ field.help_text|safe }}</div>
+            {% endif %}
+            {% if field.errors %}
+              <div class="err">{{ field.errors }}</div>
+            {% endif %}
+          </div>
+        {% endfor %}
+
+        <div class="btnrow">
+          <button class="btn btn-accent" type="submit">登録する</button>
+          <a class="btn btn-soft" href="{% url 'accounts:login' %}">ログインへ</a>
+          <a class="btn btn-soft" href="{% url 'gacha:home' %}">ホームへ</a>
+        </div>
+      </form>
+
+    </div>
+  </section>
+</div>
+{% endblock %}

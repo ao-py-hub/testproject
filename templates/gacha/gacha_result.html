@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}結果 - {{ gacha.title }}{% endblock %}
+{% block page_heading %}ガチャ結果{% endblock %}
+{% block page_subheading %}{{ gacha.title }}（ID: {{ gacha.public_id }}）{% endblock %}
+
+{% block content %}
+<style>
+  .wrap { display:grid; gap: 14px; }
+
+  .cardw{
+    background:#fff;
+    color:#0f172a;
+    border:1px solid rgba(15,23,42,.12);
+    border-radius:18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.10);
+    overflow:hidden;
+  }
+  .hd{
+    padding: 14px 16px;
+    background: linear-gradient(135deg, rgba(37,99,235,.12), rgba(124,58,237,.10));
+    border-bottom: 1px solid rgba(15,23,42,.10);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .tag{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:.4rem .75rem;
+    border-radius:999px;
+    font-weight:900;
+    letter-spacing:.02em;
+    border: 1px solid rgba(15,23,42,.12);
+    background: rgba(255,255,255,.85);
+  }
+  .tag .dot{
+    width:10px; height:10px; border-radius:999px;
+    background:#22c55e;
+    box-shadow: 0 0 0 3px rgba(34,197,94,.18);
+  }
+
+  .bd{ padding: 18px 16px; }
+
+  .big{
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    font-weight: 1000;
+    line-height: 1.15;
+    margin: 0;
+    word-break: break-word;
+  }
+  .muted{ color: rgba(15,23,42,.65); }
+
+  .meta{
+    margin-top: 12px;
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap:10px;
+  }
+  .metabox{
+    border:1px solid rgba(15,23,42,.10);
+    border-radius:14px;
+    padding:12px;
+    background: rgba(15,23,42,.02);
+  }
+  .k{ font-size:.85rem; font-weight:800; color: rgba(15,23,42,.70); }
+  .v{ margin-top:4px; font-size:1.05rem; font-weight:900; }
+
+  .btnrow{ display:flex; flex-wrap:wrap; gap:10px; }
+
+  /* SOLD OUT */
+  .warn{
+    background: rgba(185,28,28,.06);
+    border:1px solid rgba(185,28,28,.20);
+    color:#7f1d1d;
+    border-radius:16px;
+    padding: 16px;
+  }
+</style>
+
+<div class="wrap">
+  {% if sold_out %}
+    <div class="warn">
+      <div style="font-weight:1000; font-size:1.1rem;">在庫切れ</div>
+      <div class="muted" style="color:#7f1d1d; margin-top:6px;">
+        排出可能な景品がありません（stock&gt;0 かつ 確率&gt;0 が必要です）
+      </div>
+    </div>
+  {% else %}
+    <section class="cardw">
+      <div class="hd">
+        <div class="tag">
+          <span class="dot"></span>
+          <span>当たり</span>
+        </div>
+        <div class="muted" style="font-weight:700;">
+          結果が確定しました
+        </div>
+      </div>
+
+      <div class="bd">
+        <p class="muted" style="margin:0 0 8px;">あなたの結果</p>
+        <h2 class="big">{{ prize.name }}</h2>
+
+        <div class="meta">
+          <div class="metabox">
+            <div class="k">残数</div>
+            <div class="v">{{ prize.stock_remaining }}</div>
+          </div>
+
+          <div class="metabox">
+            <div class="k">ガチャID</div>
+            <div class="v" style="font-size:1rem; font-weight:900;">{{ gacha.public_id }}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  {% endif %}
+
+  <div class="btnrow">
+    <a class="btn btn-accent btn-lg" href="{% url 'gacha:draw' gacha.public_id %}">もう一回引く</a>
+    <a class="btn btn-soft" href="{% url 'gacha:public' gacha.public_id %}">結果名一覧</a>
+    <a class="btn btn-soft" href="{% url 'gacha:home' %}">ホーム</a>
+  </div>
+</div>
+{% endblock %}

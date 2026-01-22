@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}結果名一覧 - {{ gacha.title }}{% endblock %}
+{% block page_heading %}結果名一覧{% endblock %}
+{% block page_subheading %}
+{{ gacha.title }}（ガチャID：<strong>{{ gacha.public_id }}</strong>）
+{% endblock %}
+
+{% block content %}
+<style>
+  .wrap { max-width: 1000px; margin: 0 auto; display: grid; gap: 16px; }
+
+  .card {
+    background: #ffffff;
+    color: #0f172a;
+    border: 1px solid rgba(15,23,42,.12);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    overflow: hidden;
+  }
+  .card-h {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(15,23,42,.10);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .card-b { padding: 16px; }
+
+  .muted { color: rgba(15,23,42,.65); }
+  .idpill{
+    display:inline-block;
+    padding:.35rem .65rem;
+    border-radius:999px;
+    border:1px solid rgba(15,23,42,.14);
+    background: rgba(15,23,42,.04);
+    font-weight: 900;
+    font-size: .85rem;
+    white-space: nowrap;
+  }
+
+  .btnrow { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+
+  .list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 10px;
+  }
+  .item {
+    border: 1px solid rgba(15,23,42,.10);
+    border-radius: 14px;
+    padding: 12px;
+    background: rgba(15,23,42,.02);
+  }
+  .name {
+    font-weight: 1000;
+    font-size: 1.05rem;
+    word-break: break-word;
+  }
+  .meta {
+    margin-top: 8px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    font-size:.85rem;
+    color: rgba(15,23,42,.65);
+  }
+  .badge {
+    display:inline-flex;
+    align-items:center;
+    padding:.2rem .55rem;
+    border-radius: 999px;
+    border: 1px solid rgba(15,23,42,.14);
+    background: rgba(255,255,255,.85);
+    font-weight: 900;
+  }
+
+  .note {
+    border: 1px solid rgba(15,23,42,.12);
+    background: rgba(15,23,42,.02);
+    border-radius: 14px;
+    padding: 12px 14px;
+  }
+
+  .warn {
+    border: 1px solid rgba(185,28,28,.22);
+    background: rgba(185,28,28,.06);
+    border-radius: 14px;
+    padding: 12px 14px;
+    color: #7f1d1d;
+  }
+</style>
+
+<div class="wrap">
+
+  <!-- 上部情報 -->
+  <section class="card">
+    <div class="card-h">
+      <div>
+        <div style="font-weight:1000;">{{ gacha.title }}</div>
+        {% if gacha.description %}
+          <div class="muted" style="margin-top:4px;">{{ gacha.description }}</div>
+        {% else %}
+          <div class="muted" style="margin-top:4px;">説明は未設定です</div>
+        {% endif %}
+      </div>
+      <div class="idpill">ID: {{ gacha.public_id }}</div>
+    </div>
+
+    <div class="card-b">
+      <div class="btnrow">
+        <a class="btn btn-soft" href="{% url 'gacha:home' %}">ホーム</a>
+
+        {% if user.is_authenticated and user.id == gacha.owner_id %}
+          <a class="btn btn-soft" href="{% url 'gacha:manage' gacha.public_id %}">管理</a>
+          <a class="btn btn-accent" href="{% url 'gacha:draw' gacha.public_id %}">引く（制作者のみ）</a>
+        {% else %}
+          <div class="note">
+            <div style="font-weight:900;">このページについて</div>
+            <div class="muted" style="margin-top:4px;">
+              制作者以外は結果名一覧のみ閲覧できます。抽選（ガチャを引く）は制作者のみ可能です。
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <!-- 一覧 -->
+  <section class="card">
+    <div class="card-h">
+      <div>
+        <div style="font-weight:1000;">結果名一覧</div>
+        <div class="muted">制作者以外には「結果名のみ」表示されます</div>
+      </div>
+      <div class="muted" style="font-weight:900;">
+        全{{ prizes|length }}件
+      </div>
+    </div>
+
+    <div class="card-b">
+      {% if prizes %}
+        <div class="list">
+          {% for p in prizes %}
+            <div class="item">
+              <div class="name">{{ p.name }}</div>
+
+              {% if user.is_authenticated and user.id == gacha.owner_id %}
+                <div class="meta">
+                  <span class="badge">確率：{{ p.weight }}%</span>
+                  <span class="badge">残数：{{ p.stock_remaining }}</span>
+                  <span class="badge">並び：{{ p.sort_order }}</span>
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+
+        {% if user.is_authenticated and user.id == gacha.owner_id %}
+          <div class="note" style="margin-top:12px;">
+            <div style="font-weight:900;">制作者向けメモ</div>
+            <div class="muted" style="margin-top:4px;">
+              確率は%（小数可）です。削除を除いた合計が100%になるよう設定してください。残数0は抽選対象外です。
+            </div>
+          </div>
+        {% endif %}
+
+      {% else %}
+        <div class="warn">
+          <div style="font-weight:1000;">結果がまだ登録されていません</div>
+          <div style="margin-top:6px;">
+            制作者が管理画面で結果（景品）を追加してください。
+          </div>
+
+          {% if user.is_authenticated and user.id == gacha.owner_id %}
+            <div class="btnrow" style="margin-top:10px;">
+              <a class="btn btn-accent" href="{% url 'gacha:manage' gacha.public_id %}">管理へ</a>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </section>
+
+</div>
+{% endblock %}

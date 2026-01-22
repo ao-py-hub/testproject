@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}ログイン{% endblock %}
+{% block page_heading %}ログイン{% endblock %}
+{% block page_subheading %}IDとパスワードでログインします{% endblock %}
+
+{% block content %}
+<form method="post" class="row g-3">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+    <div class="col-12">
+      <div class="alert" role="alert">
+        {{ form.non_field_errors }}
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="col-12">
+    <label class="form-label">ユーザーID</label>
+    {{ form.username }}
+    {% if form.username.errors %}
+      <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+    {% endif %}
+  </div>
+
+  <div class="col-12">
+    <label class="form-label">パスワード</label>
+    {{ form.password }}
+    {% if form.password.errors %}
+      <div class="text-danger small mt-1">{{ form.password.errors }}</div>
+    {% endif %}
+  </div>
+
+  <div class="col-12 d-flex gap-2">
+    <button class="btn btn-accent" type="submit">
+      ログイン
+    </button>
+    <a class="btn btn-soft" href="{% url 'accounts:signup' %}">
+      新規登録へ
+    </a>
+  </div>
+</form>
+
+<script>
+  // Bootstrapっぽく見えるようにクラス付け（Djangoの自動生成inputに対応）
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("input").forEach(el => {
+      el.classList.add("form-control");
+    });
+  });
+</script>
+{% endblock %}

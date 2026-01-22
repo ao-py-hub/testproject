@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}新規登録{% endblock %}
+{% block page_heading %}新規登録{% endblock %}
+{% block page_subheading %}IDとパスワードだけで登録します（メール不要）{% endblock %}
+
+{% block content %}
+<form method="post" class="row g-3">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+    <div class="col-12">
+      <div class="alert" role="alert">
+        {{ form.non_field_errors }}
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="col-12">
+    <label class="form-label">ユーザーID</label>
+    {{ form.username }}
+    {% if form.username.errors %}
+      <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+    {% endif %}
+    <div class="form-text">英数字と一部記号が使えます</div>
+  </div>
+
+  <div class="col-12">
+    <label class="form-label">パスワード</label>
+    {{ form.password1 }}
+    {% if form.password1.errors %}
+      <div class="text-danger small mt-1">{{ form.password1.errors }}</div>
+    {% endif %}
+  </div>
+
+  <div class="col-12">
+    <label class="form-label">パスワード（確認）</label>
+    {{ form.password2 }}
+    {% if form.password2.errors %}
+      <div class="text-danger small mt-1">{{ form.password2.errors }}</div>
+    {% endif %}
+  </div>
+
+  <div class="col-12 d-flex gap-2">
+    <button class="btn btn-accent" type="submit">
+      登録する
+    </button>
+    <a class="btn btn-soft" href="{% url 'accounts:login' %}">
+      ログインへ
+    </a>
+  </div>
+</form>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("input").forEach(el => {
+      el.classList.add("form-control");
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}ガチャ管理 - {{ gacha.title }}{% endblock %}
+{% block page_heading %}ガチャ管理{% endblock %}
+{% block page_subheading %}
+ガチャID：<strong>{{ gacha.public_id }}</strong>（制作者のみ編集・抽選できます）
+{% endblock %}
+
+{% block content %}
+<style>
+  .wrap { max-width: 1100px; margin: 0 auto; }
+
+  .card {
+    background: #ffffff;
+    color: #0f172a;
+    border: 1px solid rgba(15,23,42,.12);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    margin-bottom: 20px;
+  }
+
+  .card-h {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(15,23,42,.1);
+    font-weight: 900;
+  }
+
+  .card-b { padding: 16px; }
+
+  label { font-weight: 800; margin-bottom: 6px; display: block; }
+
+  input[type=text],
+  input[type=number],
+  textarea {
+    width: 100%;
+    border: 1px solid rgba(15,23,42,.25);
+    border-radius: 12px;
+    padding: .6rem .75rem;
+    background: #fff;
+    color: #0f172a;
+  }
+
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 .2rem rgba(37,99,235,.18);
+  }
+
+  textarea { min-height: 100px; resize: vertical; }
+
+  .help { font-size: .85rem; color: rgba(15,23,42,.65); }
+  .err { color: #b91c1c; font-size: .85rem; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    padding: 10px;
+    border-bottom: 1px solid rgba(15,23,42,.12);
+    vertical-align: middle;
+  }
+
+  th {
+    background: rgba(15,23,42,.05);
+    font-size: .85rem;
+    color: rgba(15,23,42,.75);
+    text-align: left;
+  }
+
+  .pill {
+    display: inline-block;
+    padding: .25rem .6rem;
+    border-radius: 999px;
+    background: rgba(15,23,42,.06);
+    border: 1px solid rgba(15,23,42,.14);
+    font-size: .8rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+
+  .btnrow { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .danger {
+    background: #dc2626;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: .55rem 1rem;
+    font-weight: 800;
+  }
+</style>
+
+<div class="wrap">
+
+  {% if user.id != gacha.owner_id %}
+    <div class="card">
+      <div class="card-b">
+        <p>このガチャは制作者のみ管理できます。</p>
+      </div>
+    </div>
+  {% else %}
+
+  <form method="post">
+    {% csrf_token %}
+
+    <!-- ガチャ情報 -->
+    <div class="card">
+      <div class="card-h">ガチャ情報</div>
+      <div class="card-b">
+        <label>タイトル</label>
+        {{ form.title }}
+        {% if form.title.errors %}<div class="err">{{ form.title.errors }}</div>{% endif %}
+
+        <label class="mt-2">説明</label>
+        {{ form.description }}
+
+        <label class="mt-2">
+          {{ form.is_public }} 公開する
+        </label>
+
+        <div class="help mt-2">
+          ※ 確率は % 指定（小数可）。合計 100% にしてください。
+        </div>
+      </div>
+    </div>
+
+    <!-- 景品管理 -->
+    <div class="card">
+      <div class="card-h">景品（結果）</div>
+      <div class="card-b">
+
+        {{ formset.management_form }}
+
+        <table>
+          <thead>
+            <tr>
+              <th>結果名</th>
+              <th style="width:160px;">確率 (%)</th>
+              <th style="width:120px;">残数</th>
+              <th style="width:120px;">並び</th>
+              <th style="width:90px;">削除</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for f in formset %}
+            <tr>
+              <td>
+                {{ f.id }}
+                {% if f.name.value %}
+                  <div class="pill">{{ f.name.value }}</div>
+                {% endif %}
+                {{ f.name }}
+                {% if f.name.errors %}<div class="err">{{ f.name.errors }}</div>{% endif %}
+              </td>
+
+              <td>
+                {{ f.weight }}
+                {% if f.weight.errors %}<div class="err">{{ f.weight.errors }}</div>{% endif %}
+              </td>
+
+              <td>
+                {{ f.stock_remaining }}
+                {% if f.stock_remaining.errors %}<div class="err">{{ f.stock_remaining.errors }}</div>{% endif %}
+              </td>
+
+              <td>
+                {{ f.sort_order }}
+              </td>
+
+              <td>
+                {% if f.instance.pk %}
+                  {{ f.DELETE }}
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="help mt-2">
+          ※ 残数が 0 の景品は排出されません
+        </div>
+      </div>
+    </div>
+
+    <!-- 操作 -->
+    <div class="card">
+      <div class="card-h">操作</div>
+      <div class="card-b">
+        <div class="btnrow">
+          <button class="btn btn-accent" type="submit">保存</button>
+
+          <a class="btn btn-soft"
+             href="{% url 'gacha:draw' gacha.public_id %}">
+            テストで引く
+          </a>
+
+          <button
+            class="danger"
+            type="submit"
+            formaction="{% url 'gacha:delete' gacha.public_id %}"
+            formmethod="post"
+            onclick="return confirm('このガチャを完全に削除します。元に戻せません。');"
+          >
+            ガチャ削除
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

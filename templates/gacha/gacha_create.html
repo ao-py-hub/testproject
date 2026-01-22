@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}ガチャ作成{% endblock %}
+{% block page_heading %}ガチャ作成{% endblock %}
+{% block page_subheading %}タイトル・説明・公開設定を作成後、景品（確率/在庫）を登録します{% endblock %}
+
+{% block content %}
+<form method="post" class="row g-3">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+    <div class="col-12">
+      <div class="alert" role="alert">{{ form.non_field_errors }}</div>
+    </div>
+  {% endif %}
+
+  <div class="col-12">
+    <label class="form-label">タイトル</label>
+    {{ form.title }}
+    {% if form.title.errors %}<div class="text-danger small mt-1">{{ form.title.errors }}</div>{% endif %}
+  </div>
+
+  <div class="col-12">
+    <label class="form-label">説明（任意）</label>
+    {{ form.description }}
+    {% if form.description.errors %}<div class="text-danger small mt-1">{{ form.description.errors }}</div>{% endif %}
+  </div>
+
+  <div class="col-12 d-flex align-items-center gap-2">
+    {{ form.is_public }}
+    <label class="form-label mb-0">公開する（ONでID検索に出ます）</label>
+    {% if form.is_public.errors %}<div class="text-danger small mt-1">{{ form.is_public.errors }}</div>{% endif %}
+  </div>
+
+  <div class="col-12 d-flex gap-2">
+    <button class="btn btn-accent" type="submit">作成する</button>
+    <a class="btn btn-soft" href="{% url 'gacha:home' %}">戻る</a>
+  </div>
+</form>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("input[type=text], textarea").forEach(el => el.classList.add("form-control"));
+    document.querySelectorAll("textarea").forEach(el => el.setAttribute("rows", "4"));
+    const cb = document.querySelector("input[type=checkbox]");
+    if (cb) cb.classList.add("form-check-input");
+  });
+</script>
+{% endblock %}

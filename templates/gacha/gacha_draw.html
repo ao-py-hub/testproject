@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}引く - {{ gacha.title }}{% endblock %}
+{% block page_heading %}抽選{% endblock %}
+{% block page_subheading %}{{ gacha.title }}（ID: {{ gacha.public_id }}）{% endblock %}
+
+{% block content %}
+<div class="d-grid gap-3">
+  <div class="p-3 rounded-4" style="border:1px solid rgba(255,255,255,.12); background: rgba(2,6,23,.35);">
+    <div class="fw-bold mb-1">注意</div>
+    <div class="text-muted">
+      在庫(stock)が0、またはweightが0の景品は排出されません。
+    </div>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <button class="btn btn-accent btn-lg w-100" type="submit">ガチャを引く</button>
+  </form>
+
+  <a class="btn btn-soft" href="{% url 'gacha:public' gacha.public_id %}">結果名一覧へ</a>
+</div>
+{% endblock %}

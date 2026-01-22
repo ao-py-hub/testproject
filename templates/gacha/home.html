@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+{% block page_heading %}origacha{% endblock %}
+{% block page_subheading %}公開ガチャの一覧・ID検索・自分のガチャ管理{% endblock %}
+
+{% block content %}
+<style>
+  .cardw{
+    background:#fff; color:#0f172a;
+    border:1px solid rgba(15,23,42,.10);
+    border-radius:16px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.08);
+  }
+  .cardw .hd{ padding:14px 16px; border-bottom:1px solid rgba(15,23,42,.08); }
+  .cardw .bd{ padding:16px; }
+  .muted{ color: rgba(15,23,42,.65); }
+  .idpill{
+    font-size:.85rem; padding:.25rem .55rem; border-radius:999px;
+    border:1px solid rgba(15,23,42,.14); background: rgba(15,23,42,.04);
+  }
+  .grid{ display:grid; gap:12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .rowline{ display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+  .title{ font-weight:800; margin:0; }
+  .desc{ margin:.35rem 0 0; font-size:.9rem; color: rgba(15,23,42,.70); }
+  .btnrow{ display:flex; flex-wrap:wrap; gap:8px; }
+  .inp{
+    width:100%; border:1px solid rgba(15,23,42,.18); border-radius:12px;
+    padding:.6rem .75rem;
+  }
+</style>
+
+<div class="btnrow mb-3">
+  <a class="btn btn-accent" href="{% url 'gacha:create' %}">ガチャ作成</a>
+</div>
+
+<!-- ID検索 -->
+<section class="cardw mb-3">
+  <div class="hd">
+    <div class="fw-bold">ガチャID検索</div>
+    <div class="muted small">例：AB12CD34EF</div>
+  </div>
+  <div class="bd">
+    <form method="get" class="d-flex gap-2">
+      <input class="inp" type="text" name="q" value="{{ q }}" placeholder="ガチャIDを入力">
+      <button class="btn btn-soft" type="submit">検索</button>
+    </form>
+
+    {% if q %}
+      <hr>
+      {% if hit %}
+        <div class="rowline">
+          <div>
+            <div class="fw-bold">{{ hit.title }}</div>
+            <div class="muted small">ID: {{ hit.public_id }}</div>
+          </div>
+          <div class="btnrow">
+            <a class="btn btn-accent" href="{% url 'gacha:public' hit.public_id %}">開く</a>
+            <a class="btn btn-soft" href="{% url 'gacha:draw' hit.public_id %}">引く</a>
+          </div>
+        </div>
+      {% else %}
+        <div class="muted">該当する公開ガチャが見つかりません。</div>
+      {% endif %}
+    {% endif %}
+  </div>
+</section>
+
+<!-- 自分のガチャ -->
+{% if user.is_authenticated %}
+<section class="cardw mb-3">
+  <div class="hd">
+    <div class="fw-bold">自分のガチャ</div>
+    <div class="muted small">管理（編集）できます</div>
+  </div>
+  <div class="bd">
+    {% if my_gachas and my_gachas.exists %}
+      <div class="grid">
+        {% for g in my_gachas %}
+          <div style="border:1px solid rgba(15,23,42,.10); border-radius:14px; padding:12px;">
+            <div class="rowline">
+              <div>
+                <p class="title">{{ g.title }}</p>
+                <div class="muted small"><span class="idpill">ID: {{ g.public_id }}</span></div>
+                {% if g.description %}<p class="desc">{{ g.description|truncatechars:90 }}</p>{% endif %}
+              </div>
+            </div>
+            <div class="btnrow mt-2">
+              <a class="btn btn-accent" href="{% url 'gacha:manage' g.public_id %}">管理</a>
+              <a class="btn btn-soft" href="{% url 'gacha:public' g.public_id %}">公開ページ</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="muted">まだ作成したガチャがありません。</div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<!-- 公開ガチャ一覧 -->
+<section class="cardw">
+  <div class="hd">
+    <div class="fw-bold">公開ガチャ一覧</div>
+    <div class="muted small">誰でも閲覧できます（結果名のみ表示）</div>
+  </div>
+  <div class="bd">
+    {% if public_gachas and public_gachas.exists %}
+      <div class="grid">
+        {% for g in public_gachas %}
+          <div style="border:1px solid rgba(15,23,42,.10); border-radius:14px; padding:12px;">
+            <div class="rowline">
+              <div>
+                <p class="title">{{ g.title }}</p>
+                <div class="muted small"><span class="idpill">ID: {{ g.public_id }}</span></div>
+                {% if g.description %}<p class="desc">{{ g.description|truncatechars:90 }}</p>{% endif %}
+              </div>
+            </div>
+            <div class="btnrow mt-2">
+              <a class="btn btn-accent" href="{% url 'gacha:public' g.public_id %}">開く</a>
+              <a class="btn btn-soft" href="{% url 'gacha:draw' g.public_id %}">引く</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="muted">公開ガチャがまだありません。</div>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}
